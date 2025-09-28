@@ -1,0 +1,100 @@
+name: FoodApp
+
+entities:
+  User:
+    authenticable: true
+    properties:
+      - name
+      - name: email
+        type: email
+      - name: role
+        type: choice
+        options:
+          values: [admin, user]
+        default: user
+    policies:
+      create:
+        - access: admin
+      read:
+        - access: restricted
+          allow: User
+          condition: self
+      update:
+        - access: restricted
+          allow: User
+          condition: self
+      delete:
+        - access: admin
+      signup:
+        - access: public
+
+  Recipe:
+    properties:
+      - name: title
+        type: string
+      - name: description
+        type: richText
+      - name: ingredients
+        type: text
+        helpText: 'List each ingredient on a new line.'
+      - name: instructions
+        type: richText
+      - name: prepTime
+        type: number
+        helpText: 'Preparation time in minutes.'
+      - name: photo
+        type: image
+        options:
+          sizes:
+            thumbnail:
+              width: 400
+              height: 300
+            large:
+              width: 1024
+              height: 768
+      - name: status
+        type: choice
+        options:
+          values: [draft, published]
+        default: draft
+    belongsTo:
+      - name: author
+        entity: User
+    belongsToMany:
+      - Category
+    policies:
+      create:
+        - access: restricted
+          allow: User
+      read:
+        - access: public
+      update:
+        - access: restricted
+          allow: User
+          condition: self
+      delete:
+        - access: restricted
+          allow: User
+          condition: self
+
+  Category:
+    properties:
+      - name
+    policies:
+      create:
+        - access: admin
+      read:
+        - access: public
+      update:
+        - access: admin
+      delete:
+        - access: admin
+
+
+# Health check endpoint for connection testing
+endpoints:
+  health:
+    path: /api/health
+    method: GET
+    policies: []
+    handler: healthCheck
